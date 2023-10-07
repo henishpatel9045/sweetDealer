@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 
 from core.constants import OrderConstant
 from core.models import ExpenseTracker, Order, Item
@@ -16,8 +17,10 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-@method_decorator(cache_page(60 * 10), name="dispatch")
+# @method_decorator(cache_page(60 * 10), name="dispatch")
 class DashboardView(APIView):
+    # throttle_classes = [AnonRateThrottle]
+
     def get(self, request):
         """This view returns following detail for react dashboard.
         1. total_dealers
@@ -112,17 +115,35 @@ class DashboardView(APIView):
                 .order_by("date")
             )
 
+            order_items_values = qs.values("items")
+            items_detail = Item.objects.all().values_list("name", "packs")
+            items_detail_dict = {
+                item[0]: {i["box"]: i["price"] for i in item[1]}
+                for item in items_detail
+            }
+
             # 10. item_sales_data
             item_sales_data = {}
-            for item in Item.objects.all():
-                item_sales_data[item.name] = {
+            for item in items_detail_dict.keys():
+                item_sales_data[item] = {
                     "total_weight": sum(
                         sum(
-                            int(p["box"].split()[0]) * p["quantity"]
+                            int(p["box"].split()[0])
+                            * (1000 if "KG" in p["box"] else 1)
+                            * p["quantity"]
                             for p in order["items"]
-                            if p["item"] == item.name
+                            if p["item"] == item
                         )
-                        for order in qs.values("items")
+                        for order in order_items_values
+                    ),
+                    "total_amount": sum(
+                        sum(
+                            order_item["quantity"]
+                            * items_detail_dict[item][order_item["box"]]
+                            for order_item in order["items"]
+                            if order_item["item"] == item
+                        )
+                        for order in order_items_values
                     ),
                     "total_quantity": 0,
                 }
@@ -141,6 +162,31 @@ class DashboardView(APIView):
             }
 
             return Response(response, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.exception(e)
+            return Response(
+                {"error": "Something went wrong"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class DealerView(APIView):
+    def get(self, request):
+        try:
+            qs = Order.objects.prefetch_related("book", "book__dealer").exclude(
+                status=OrderConstant.STATUS_CANCELLED.value
+            )
+            dealer = (
+                qs.values("book__dealer")
+                .annotate(
+                    total_orders=models.Count("pk"),
+                    total_amount=models.Sum("total_amount"),
+                    dealer_phone=models.F("book__dealer__username"),
+                    dealer_name=models.F("book__dealer__name"),
+                )
+                .order_by("-total_amount")
+            )
+            return Response(dealer, status=status.HTTP_200_OK)
         except Exception as e:
             logger.exception(e)
             return Response(

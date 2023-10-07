@@ -143,7 +143,10 @@ if DEBUG:
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/second',  # 10 requests per 5 seconds for anonymous clients
+    },
 }
 
 SIMPLE_JWT = {

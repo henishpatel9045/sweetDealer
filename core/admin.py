@@ -61,7 +61,7 @@ class OrderAdmin(admin.ModelAdmin):
         "status",
         "payment_received_to_dealer",
         "final_payment_received",
-        "updated_at",
+        "created_at",
     )
     search_fields = (
         "id",
@@ -69,6 +69,11 @@ class OrderAdmin(admin.ModelAdmin):
         "book__dealer__username",
         "customer",
         "phone",
+    )
+    list_filter = (
+        "status",
+        "payment_received_to_dealer",
+        "final_payment_received",
     )
 
     def save_model(self, request, obj, form, change):

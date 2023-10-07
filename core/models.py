@@ -48,7 +48,7 @@ class Item(models.Model):
                     ],
                 },
                 "price": {"type": "integer", "minimun": "0", "required": True},
-                "quantity_ready": {"type": "integer", "minimun": "0", "default": "0"},
+                "quantity_ready": {"type": "integer", "minimun": "0", "default": 0},
             },
         },
         "minItems": 1,
@@ -77,21 +77,8 @@ class OrderManage(models.Manager):
         return self.exclude(status=OrderConstant.STATUS_CANCELLED.value)
 
 
-class Order(TimeUpdateModel, models.Model):
-    STATUS_CHOICES = (
-        (OrderConstant.STATUS_PENDING.value, OrderConstant.STATUS_PENDING.value),
-        (OrderConstant.STATUS_READY.value, OrderConstant.STATUS_READY.value),
-        (OrderConstant.STATUS_DELIVERED.value, OrderConstant.STATUS_DELIVERED.value),
-        (OrderConstant.STATUS_CANCELLED.value, OrderConstant.STATUS_CANCELLED.value),
-    )
-
-    PICKUP_OPTIONS = [
-        ("Dealer", "Dealer"),
-        ("Customer", "Customer"),
-        ("City Outlet", "City Outlet"),
-    ]
-
-    ITEMS_SCHEMA = {
+def order_schema():
+    return {
         "type": "array",
         "title": "OrderItems",
         "items": {
@@ -122,6 +109,21 @@ class Order(TimeUpdateModel, models.Model):
         "minItems": 1,
     }
 
+
+class Order(TimeUpdateModel, models.Model):
+    STATUS_CHOICES = (
+        (OrderConstant.STATUS_PENDING.value, OrderConstant.STATUS_PENDING.value),
+        (OrderConstant.STATUS_READY.value, OrderConstant.STATUS_READY.value),
+        (OrderConstant.STATUS_DELIVERED.value, OrderConstant.STATUS_DELIVERED.value),
+        (OrderConstant.STATUS_CANCELLED.value, OrderConstant.STATUS_CANCELLED.value),
+    )
+
+    PICKUP_OPTIONS = [
+        ("Dealer", "Dealer"),
+        ("Customer", "Customer"),
+        ("City Outlet", "City Outlet"),
+    ]
+
     book = models.ForeignKey(BillBook, related_name="orders", on_delete=models.CASCADE)
     customer = models.CharField(max_length=200)
     phone = models.CharField(max_length=20, null=True, blank=True)
@@ -133,9 +135,11 @@ class Order(TimeUpdateModel, models.Model):
     total_amount = models.DecimalField(
         max_digits=12, decimal_places=2, default=0, blank=True
     )
-    items = JSONField(schema=ITEMS_SCHEMA)
+    items = JSONField(schema=order_schema)
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default=OrderConstant.STATUS_PENDING.value
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=OrderConstant.STATUS_PENDING.value,
     )
 
     order_picked_at = models.DateTimeField(null=True, blank=True)
@@ -178,3 +182,4 @@ class ExpenseTracker(TimeUpdateModel, models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0, "Amount must be positive.")],
     )
+
