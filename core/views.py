@@ -1,7 +1,9 @@
+from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,6 +11,7 @@ from rest_framework.throttling import AnonRateThrottle
 
 from core.constants import OrderConstant
 from core.models import ExpenseTracker, Order, Item
+from export.excel import export_data
 
 import logging
 
@@ -193,3 +196,15 @@ class DealerView(APIView):
                 {"error": "Something went wrong"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+def download_excel(request):
+    # Generate your Excel data and save it to a BytesIO object
+    FILE_NAME = f"Sales Report ({timezone.now().strftime('%d-%m-%Y')}).xlsx"
+    data = Order.objects.all().values()
+    excel_buffer = export_data(data)
+    # Create an HTTP response with the Excel data
+    response = HttpResponse(content_type="application/ms-excel")
+    response["Content-Disposition"] = f'attachment; filename="{FILE_NAME}"'
+    response.write(excel_buffer)
+    return response

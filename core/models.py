@@ -159,6 +159,12 @@ class Order(TimeUpdateModel, models.Model):
 
     def save(self, *args, **kwargs):
         self.total_amount = self.get_total_amount()
+        if self.amount_paid > self.total_amount:
+            raise Exception("Amount paid cannot be greater than total amount.")
+        if self.amount_paid == self.total_amount:
+            self.final_payment_received = True
+        else:
+            self.final_payment_received = False
         super().save(*args, **kwargs)
 
     def get_total_amount(self):
@@ -182,4 +188,3 @@ class ExpenseTracker(TimeUpdateModel, models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0, "Amount must be positive.")],
     )
-

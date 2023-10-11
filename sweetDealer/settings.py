@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+from django.contrib import admin
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -16,6 +17,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "admin_shortcuts",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -144,8 +146,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/second',  # 10 requests per 5 seconds for anonymous clients
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "5/second",  # 10 requests per 5 seconds for anonymous clients
     },
 }
 
@@ -156,3 +158,20 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+ADMIN_SHORTCUTS = [
+    {
+        'title': 'Export',
+        'shortcuts': [
+            {
+                'title': 'Excel',
+                "url": "/export-excel",
+                "icon": "file-excel",
+            },
+        ]
+    },
+]
+
+ADMIN_SHORTCUTS_SETTINGS = {
+    'open_new_window': False,
+}

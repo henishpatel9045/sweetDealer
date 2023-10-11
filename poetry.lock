@@ -35,6 +35,19 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-admin-shortcuts"
+version = "2.1.1"
+description = "Add simple and pretty shortcuts to the django admin homepage."
+optional = false
+python-versions = "*"
+files = [
+    {file = "django-admin-shortcuts-2.1.1.tar.gz", hash = "sha256:0e667aa4fc5a0b4a4043e6d5a905305b32631322968f34a94a12ad66bd956587"},
+]
+
+[package.dependencies]
+Django = ">=1.2"
+
+[[package]]
 name = "django-cors-headers"
 version = "4.2.0"
 description = "django-cors-headers is a Django application for handling the server headers required for Cross-Origin Resource Sharing (CORS)."
@@ -266,7 +279,18 @@ files = [
     {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
 ]
 
+[[package]]
+name = "xlsxwriter"
+version = "3.1.7"
+description = "A Python module for creating Excel XLSX files."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "XlsxWriter-3.1.7-py3-none-any.whl", hash = "sha256:8c730c4beb468696c4160aa1d6d168fb4c1a20dd972b212cd8cc1e74ddeab1b6"},
+    {file = "XlsxWriter-3.1.7.tar.gz", hash = "sha256:353042efb0f8551ce72baa087e98228f3394fcb380e8b96313edf1eec8d50823"},
+]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b5f29fc73dae5a07298ab580cf740f3488abb3cf808cee7dea6542e84c2f07e9"
+content-hash = "9a619f11cc1b90910e2a5abbea3065e13708cbec9019cf6f46d5b8604aa2b79f"

@@ -4,3 +4,5 @@
 *.pyo
 
 demo.py
+staticfiles
+*.xls*
