@@ -1,7 +1,12 @@
+from django.db.models import Prefetch, Count, Sum
+from django.contrib.auth import get_user_model
 from io import BytesIO
 import xlsxwriter
-from core.models import Item
+
+from core.models import Item, Order
 from core.constants import BoxConstant
+
+User = get_user_model()
 
 COMMON_COLOR = "#82CD47"
 WHITE = "#fff"
@@ -228,11 +233,36 @@ def write_orders_data(worksheet, excel_file, data):
         curr_row += 1
 
 
-def export_data(data):
+def write_dealers_data(
+    worksheet: xlsxwriter.workbook.Worksheet, excel_file: xlsxwriter.Workbook, data
+) -> None:
+    """Function to write dealer data in table in excel sheet.
+
+    Args:
+        worksheet (_type_)
+        excel_file (_type_): _description_
+        data (_type_): _description_
+    """
+    data = (
+        User.objects.filter(is_dealer=True)
+        .prefetch_related(Prefetch("billbook", Order.objects.all(), to_attr="orders"))
+        .values("username")
+        .annotate(
+            total_amount=Sum("orders__total_amount"),
+            total_orders=Count("orders__pk"),
+        )
+    )
+
+    print(data)
+
+
+
+def export_data():
     with BytesIO() as output:
         SHEET_NAME = "Orders"
         excel_file = xlsxwriter.Workbook(output)
         worksheet = excel_file.add_worksheet(SHEET_NAME)
+        data = Order.objects.all().values()
         write_orders_data(worksheet, excel_file, data)
         excel_file.close()
         output.seek(0)

@@ -67,10 +67,10 @@ class DealerAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         self.orders = (
-            Order.objects.prefetch_related("book", "book__dealer")
+            Order.objects.prefetch_related("bill_book", "bill_book__dealer")
             .all()
             .values_list(
-                "book__dealer__pk",
+                "bill_book__dealer__pk",
                 "total_amount",
                 "payment_received_to_dealer",
                 "final_payment_received",
@@ -93,6 +93,3 @@ class CustomUser(UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter()

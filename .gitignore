@@ -6,3 +6,4 @@
 demo.py
 staticfiles
 *.xls*
+.vscode

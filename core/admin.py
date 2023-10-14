@@ -2,6 +2,7 @@ from typing import Any
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.utils.html import format_html
+from django.db import transaction
 
 from core.models import BillBook, Item, Order
 
@@ -11,11 +12,7 @@ User = get_user_model()
 @admin.register(BillBook)
 class BillBookAdmin(admin.ModelAdmin):
     autocomplete_fields = ("dealer",)
-
-    # def get_field_queryset(self, db, db_field, request):
-    #     if db_field.name == "dealer":
-    #         return User.objects.filter(is_dealer=True)
-    #     return super().get_field_queryset(db, db_field, request)
+    search_fields = ("dealer__username",)
 
 
 @admin.register(Item)
@@ -55,7 +52,7 @@ class ItemAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "book",
+        "bill_book",
         "customer",
         "total_amount",
         "status",
@@ -65,8 +62,8 @@ class OrderAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "id",
-        "book__id",
-        "book__dealer__username",
+        "bill_book__id",
+        "bill_book__dealer__username",
         "customer",
         "phone",
     )
@@ -75,6 +72,13 @@ class OrderAdmin(admin.ModelAdmin):
         "payment_received_to_dealer",
         "final_payment_received",
     )
+    autocomplete_fields = ("bill_book",)
+    actions = ("calculate_total_amount",)
+
+    def calculate_total_amount(self, request, queryset):
+        with transaction.atomic():
+            for q in queryset:
+                q.save()
 
     def save_model(self, request, obj, form, change):
         try:

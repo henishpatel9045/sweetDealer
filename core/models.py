@@ -28,7 +28,7 @@ class BillBook(TimeUpdateModel, models.Model):
     max_bills = models.IntegerField(default=0)
 
     def __str__(self) -> str:
-        return str(self.pk)
+        return f"{self.dealer.get_username()} - {self.pk}"
 
 
 class Item(models.Model):
@@ -124,7 +124,10 @@ class Order(TimeUpdateModel, models.Model):
         ("City Outlet", "City Outlet"),
     ]
 
-    book = models.ForeignKey(BillBook, related_name="orders", on_delete=models.CASCADE)
+    bill_book = models.ForeignKey(
+        BillBook, related_name="orders", on_delete=models.CASCADE
+    )
+    order_number = models.CharField(max_length=10)
     customer = models.CharField(max_length=200)
     phone = models.CharField(max_length=20, null=True, blank=True)
     city_area = models.CharField(max_length=300, null=True, blank=True)
@@ -155,7 +158,11 @@ class Order(TimeUpdateModel, models.Model):
         return str(self.pk)
 
     class Meta:
-        ordering = ["-updated_at"]
+        ordering = ["-created_at"]
+        unique_together = [
+            "bill_book",
+            "order_number",
+        ]
 
     def save(self, *args, **kwargs):
         self.total_amount = self.get_total_amount()

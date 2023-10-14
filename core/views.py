@@ -44,7 +44,7 @@ class DashboardView(APIView):
             JSON response containing above details
         """
         try:
-            qs = Order.objects.prefetch_related("book", "book__dealer").exclude(
+            qs = Order.objects.prefetch_related("bill_book", "bill_book__dealer").exclude(
                 status=OrderConstant.STATUS_CANCELLED.value
             )
 
@@ -95,12 +95,12 @@ class DashboardView(APIView):
 
             # 8. Top dealers
             top_dealers = (
-                qs.values("book__dealer")
+                qs.values("bill_book__dealer")
                 .annotate(
                     total_orders=models.Count("pk"),
                     total_amount=models.Sum("total_amount"),
-                    dealer_phone=models.F("book__dealer__username"),
-                    dealer_name=models.F("book__dealer__name"),
+                    dealer_phone=models.F("bill_book__dealer__username"),
+                    dealer_name=models.F("bill_book__dealer__name"),
                 )
                 .order_by("-total_amount")[:5]
             )
@@ -176,16 +176,16 @@ class DashboardView(APIView):
 class DealerView(APIView):
     def get(self, request):
         try:
-            qs = Order.objects.prefetch_related("book", "book__dealer").exclude(
+            qs = Order.objects.prefetch_related("bill_book", "bill_book__dealer").exclude(
                 status=OrderConstant.STATUS_CANCELLED.value
             )
             dealer = (
-                qs.values("book__dealer")
+                qs.values("bill_book__dealer")
                 .annotate(
                     total_orders=models.Count("pk"),
                     total_amount=models.Sum("total_amount"),
-                    dealer_phone=models.F("book__dealer__username"),
-                    dealer_name=models.F("book__dealer__name"),
+                    dealer_phone=models.F("bill_book__dealer__username"),
+                    dealer_name=models.F("bill_book__dealer__name"),
                 )
                 .order_by("-total_amount")
             )
@@ -202,7 +202,7 @@ def download_excel(request):
     # Generate your Excel data and save it to a BytesIO object
     FILE_NAME = f"Sales Report ({timezone.now().strftime('%d-%m-%Y')}).xlsx"
     data = Order.objects.all().values()
-    excel_buffer = export_data(data)
+    excel_buffer = export_data()
     # Create an HTTP response with the Excel data
     response = HttpResponse(content_type="application/ms-excel")
     response["Content-Disposition"] = f'attachment; filename="{FILE_NAME}"'

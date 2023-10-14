@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "debug_toolbar",
     "rest_framework",
-    "rest_framework_simplejwt",
+    # "rest_framework_simplejwt",
     "django_jsonform",
     "corsheaders",
     "custom_auth",
@@ -143,9 +143,9 @@ if DEBUG:
     ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    # "DEFAULT_AUTHENTICATION_CLASSES": (
+    #     "rest_framework_simplejwt.authentication.JWTAuthentication",
+    # ),
     "DEFAULT_THROTTLE_RATES": {
         "anon": "5/second",  # 10 requests per 5 seconds for anonymous clients
     },
