@@ -1,0 +1,13 @@
+django 
+djangorestframework
+django-jazzmin 
+djangorestframework-simplejwt 
+django-jsonform
+django-cors-headers
+docutils
+xlsxwriter
+django-admin-shortcuts
+cloudinary
+django-debug-toolbar
+pyyaml 
+uritemplate 
