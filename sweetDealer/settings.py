@@ -1,6 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 from django.contrib import admin
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -175,3 +176,9 @@ ADMIN_SHORTCUTS = [
 ADMIN_SHORTCUTS_SETTINGS = {
     'open_new_window': False,
 }
+
+cloudinary.config( 
+  cloud_name = "dxhdh2isn", 
+  api_key = "952223716825345",
+  api_secret = "RVov-JpHpJHh8BXZQ-6Q1v3uQIc" 
+)

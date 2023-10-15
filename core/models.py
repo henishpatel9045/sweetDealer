@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 from django_jsonform.models.fields import JSONField
+from cloudinary.models import CloudinaryField
 
 from core.constants import OrderConstant, BoxConstant
 
@@ -111,6 +112,9 @@ def order_schema():
 
 
 class Order(TimeUpdateModel, models.Model):
+    def bill_image_folder(self):
+        return f"bill_images/{self.bill_book.dealer.get_username()}/{self.bill_book.pk}/{self.order_number}"
+
     STATUS_CHOICES = (
         (OrderConstant.STATUS_PENDING.value, OrderConstant.STATUS_PENDING.value),
         (OrderConstant.STATUS_READY.value, OrderConstant.STATUS_READY.value),
@@ -139,6 +143,7 @@ class Order(TimeUpdateModel, models.Model):
         max_digits=12, decimal_places=2, default=0, blank=True
     )
     items = JSONField(schema=order_schema)
+    bill_image = CloudinaryField(null=True, blank=True, folder=bill_image_folder)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
@@ -173,6 +178,8 @@ class Order(TimeUpdateModel, models.Model):
         else:
             self.final_payment_received = False
         super().save(*args, **kwargs)
+
+
 
     def get_total_amount(self):
         total = 0
