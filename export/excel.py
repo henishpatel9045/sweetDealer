@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from io import BytesIO
 import xlsxwriter
 
+from django.db import models
+
 from core.models import Item, Order
 from core.constants import BoxConstant
 
@@ -131,6 +133,22 @@ EXPORT_FORMAT = [
         "key": "final_payment_received",
         "pre-func": lambda x: "Yes" if x else "No",
     },
+    {
+        "title": "Dealer Name",
+        "col-type": "single",
+        "bg-color": COMMON_COLOR,
+        "text-color": WHITE,
+        "key": "dealer_name",
+        "pre-func": lambda x: x,
+    },
+    {
+        "title": "Dealer Phone",
+        "col-type": "single",
+        "bg-color": COMMON_COLOR,
+        "text-color": WHITE,
+        "key": "dealer_phone",
+        "pre-func": lambda x: x,
+    },
 ]
 
 
@@ -245,7 +263,7 @@ def write_dealers_data(
     """
     data = (
         User.objects.filter(is_dealer=True)
-        .prefetch_related(Prefetch("billbook", Order.objects.all(), to_attr="orders"))
+        .prefetch_related(Prefetch("orders", Order.objects.all(), to_attr="orders"))
         .values("username")
         .annotate(
             total_amount=Sum("orders__total_amount"),
@@ -262,7 +280,10 @@ def export_data():
         SHEET_NAME = "Orders"
         excel_file = xlsxwriter.Workbook(output)
         worksheet = excel_file.add_worksheet(SHEET_NAME)
-        data = Order.objects.all().values()
+        data = Order.objects.all().annotate(
+        dealer_phone=models.F("dealer__username"),
+        dealer_name=models.F("dealer__name")
+    ).values()
         write_orders_data(worksheet, excel_file, data)
         excel_file.close()
         output.seek(0)

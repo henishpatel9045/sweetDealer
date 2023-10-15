@@ -24,12 +24,12 @@ class TimeUpdateModel(models.Model):
         abstract = True
 
 
-class BillBook(TimeUpdateModel, models.Model):
-    dealer = models.ForeignKey(User, related_name="billbook", on_delete=models.CASCADE)
-    max_bills = models.IntegerField(default=0)
+# class BillBook(TimeUpdateModel, models.Model):
+#     dealer = models.ForeignKey(User, related_name="billbook", on_delete=models.CASCADE)
+#     max_bills = models.IntegerField(default=0)
 
-    def __str__(self) -> str:
-        return f"{self.dealer.get_username()} - {self.pk}"
+#     def __str__(self) -> str:
+#         return f"{self.dealer.get_username()} - {self.pk}"
 
 
 class Item(models.Model):
@@ -113,7 +113,7 @@ def order_schema():
 
 class Order(TimeUpdateModel, models.Model):
     def bill_image_folder(self):
-        return f"bill_images/{self.bill_book.dealer.get_username()}/{self.bill_book.pk}/{self.order_number}"
+        return f"bill_images/{self.dealer.get_username()}/{self.order_number}"
 
     STATUS_CHOICES = (
         (OrderConstant.STATUS_PENDING.value, OrderConstant.STATUS_PENDING.value),
@@ -128,10 +128,10 @@ class Order(TimeUpdateModel, models.Model):
         ("City Outlet", "City Outlet"),
     ]
 
-    bill_book = models.ForeignKey(
-        BillBook, related_name="orders", on_delete=models.CASCADE
+    dealer = models.ForeignKey(
+        User, related_name="orders", on_delete=models.CASCADE
     )
-    order_number = models.CharField(max_length=10)
+    order_number = models.IntegerField(unique=True, validators=[MinValueValidator(1)])
     customer = models.CharField(max_length=200)
     phone = models.CharField(max_length=20, null=True, blank=True)
     city_area = models.CharField(max_length=300, null=True, blank=True)
@@ -165,7 +165,7 @@ class Order(TimeUpdateModel, models.Model):
     class Meta:
         ordering = ["-created_at"]
         unique_together = [
-            "bill_book",
+            "dealer",
             "order_number",
         ]
 

@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.db import models
@@ -44,7 +44,7 @@ class DashboardView(APIView):
             JSON response containing above details
         """
         try:
-            qs = Order.objects.prefetch_related("bill_book", "bill_book__dealer").exclude(
+            qs = Order.objects.prefetch_related("dealer").exclude(
                 status=OrderConstant.STATUS_CANCELLED.value
             )
 
@@ -95,12 +95,12 @@ class DashboardView(APIView):
 
             # 8. Top dealers
             top_dealers = (
-                qs.values("bill_book__dealer")
+                qs.values("dealer")
                 .annotate(
                     total_orders=models.Count("pk"),
                     total_amount=models.Sum("total_amount"),
-                    dealer_phone=models.F("bill_book__dealer__username"),
-                    dealer_name=models.F("bill_book__dealer__name"),
+                    dealer_phone=models.F("dealer__username"),
+                    dealer_name=models.F("dealer__name"),
                 )
                 .order_by("-total_amount")[:5]
             )
@@ -176,16 +176,16 @@ class DashboardView(APIView):
 class DealerView(APIView):
     def get(self, request):
         try:
-            qs = Order.objects.prefetch_related("bill_book", "bill_book__dealer").exclude(
+            qs = Order.objects.prefetch_related("dealer").exclude(
                 status=OrderConstant.STATUS_CANCELLED.value
             )
             dealer = (
-                qs.values("bill_book__dealer")
+                qs.values("dealer")
                 .annotate(
                     total_orders=models.Count("pk"),
                     total_amount=models.Sum("total_amount"),
-                    dealer_phone=models.F("bill_book__dealer__username"),
-                    dealer_name=models.F("bill_book__dealer__name"),
+                    dealer_phone=models.F("dealer__username"),
+                    dealer_name=models.F("dealer__name"),
                 )
                 .order_by("-total_amount")
             )
@@ -199,12 +199,15 @@ class DealerView(APIView):
 
 
 def download_excel(request):
-    # Generate your Excel data and save it to a BytesIO object
-    FILE_NAME = f"Sales Report ({timezone.now().strftime('%d-%m-%Y')}).xlsx"
-    data = Order.objects.all().values()
-    excel_buffer = export_data()
-    # Create an HTTP response with the Excel data
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = f'attachment; filename="{FILE_NAME}"'
-    response.write(excel_buffer)
-    return response
+    try:
+        # Generate your Excel data and save it to a BytesIO object
+        FILE_NAME = f"Sales Report ({timezone.now().strftime('%d-%m-%Y')}).xlsx"
+        excel_buffer = export_data()
+        # Create an HTTP response with the Excel data
+        response = HttpResponse(content_type="application/ms-excel")
+        response["Content-Disposition"] = f'attachment; filename="{FILE_NAME}"'
+        response.write(excel_buffer)
+        return response
+    except Exception as e:
+        logger.exception(e)
+        return JsonResponse({"detail": "error occurred"})

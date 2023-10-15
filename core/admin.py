@@ -4,15 +4,15 @@ from django.contrib.auth import get_user_model
 from django.utils.html import format_html
 from django.db import transaction
 
-from core.models import BillBook, Item, Order
+from core.models import Item, Order
 
 User = get_user_model()
 
-
-@admin.register(BillBook)
-class BillBookAdmin(admin.ModelAdmin):
-    autocomplete_fields = ("dealer",)
-    search_fields = ("dealer__username",)
+admin.site.site_header = "Vadiparti Yuvak Mandal"
+# @admin.register(BillBook)
+# class BillBookAdmin(admin.ModelAdmin):
+#     autocomplete_fields = ("dealer",)
+#     search_fields = ("dealer__username",)
 
 
 @admin.register(Item)
@@ -52,7 +52,7 @@ class ItemAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "bill_book",
+        "dealer",
         "customer",
         "total_amount",
         "status",
@@ -62,8 +62,7 @@ class OrderAdmin(admin.ModelAdmin):
     )
     search_fields = (
         "id",
-        "bill_book__id",
-        "bill_book__dealer__username",
+        "dealer__username",
         "customer",
         "phone",
     )
@@ -72,7 +71,7 @@ class OrderAdmin(admin.ModelAdmin):
         "payment_received_to_dealer",
         "final_payment_received",
     )
-    autocomplete_fields = ("bill_book",)
+    autocomplete_fields = ("dealer",)
     actions = ("calculate_total_amount",)
 
     def calculate_total_amount(self, request, queryset):

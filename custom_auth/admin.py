@@ -67,10 +67,10 @@ class DealerAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         self.orders = (
-            Order.objects.prefetch_related("bill_book", "bill_book__dealer")
+            Order.objects.prefetch_related("dealer")
             .all()
             .values_list(
-                "bill_book__dealer__pk",
+                "dealer__pk",
                 "total_amount",
                 "payment_received_to_dealer",
                 "final_payment_received",
