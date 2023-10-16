@@ -162,19 +162,26 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 ADMIN_SHORTCUTS = [
     {
-        'title': 'Export',
+        'title': '',
         'shortcuts': [
             {
-                'title': 'Excel',
+                'title': 'Export Excel',
                 "url": "/export-excel",
                 "icon": "file-excel",
+            },
+            {
+                'title': 'Public Site',
+                "url": "https://vadipartisweets.netlify.app/",
+                "icon": "home",
             },
         ]
     },
 ]
 
 ADMIN_SHORTCUTS_SETTINGS = {
-    'open_new_window': False,
+    'show_on_all_pages': False,
+    'hide_app_list': False,
+    'open_new_window': True,
 }
 
 cloudinary.config( 

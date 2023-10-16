@@ -51,7 +51,7 @@ class ItemAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
+        "order_number",
         "dealer",
         "customer",
         "total_amount",
@@ -61,10 +61,10 @@ class OrderAdmin(admin.ModelAdmin):
         "created_at",
     )
     search_fields = (
-        "id",
-        "dealer__username",
-        "customer",
+        "order_number",
         "phone",
+        "customer",
+        "dealer__username",
     )
     list_filter = (
         "status",

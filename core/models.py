@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 from django_jsonform.models.fields import JSONField
+from django.utils import timezone
 from cloudinary.models import CloudinaryField
 
 from core.constants import OrderConstant, BoxConstant
@@ -128,9 +129,7 @@ class Order(TimeUpdateModel, models.Model):
         ("City Outlet", "City Outlet"),
     ]
 
-    dealer = models.ForeignKey(
-        User, related_name="orders", on_delete=models.CASCADE
-    )
+    dealer = models.ForeignKey(User, related_name="orders", on_delete=models.CASCADE)
     order_number = models.IntegerField(unique=True, validators=[MinValueValidator(1)])
     customer = models.CharField(max_length=200)
     phone = models.CharField(max_length=20, null=True, blank=True)
@@ -150,6 +149,7 @@ class Order(TimeUpdateModel, models.Model):
         default=OrderConstant.STATUS_PENDING.value,
     )
 
+    created_at = models.DateTimeField(default=timezone.now, blank=True)
     order_picked_at = models.DateTimeField(null=True, blank=True)
     order_picked_by = models.CharField(
         max_length=150, choices=PICKUP_OPTIONS, null=True, blank=True
@@ -160,14 +160,10 @@ class Order(TimeUpdateModel, models.Model):
     objects = OrderManage()
 
     def __str__(self) -> str:
-        return str(self.pk)
+        return str(self.order_number)
 
     class Meta:
         ordering = ["-created_at"]
-        unique_together = [
-            "dealer",
-            "order_number",
-        ]
 
     def save(self, *args, **kwargs):
         self.total_amount = self.get_total_amount()
@@ -178,8 +174,6 @@ class Order(TimeUpdateModel, models.Model):
         else:
             self.final_payment_received = False
         super().save(*args, **kwargs)
-
-
 
     def get_total_amount(self):
         total = 0
