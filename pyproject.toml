@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "sweetdealer - copy"
+name = "sweetdealer"
 version = "0.1.0"
 description = "SweetDealer backend for React frontend."
 authors = ["Henish Patel <200120107182@git.org.in>"]
@@ -11,7 +11,7 @@ django = "^4.2.6"
 djangorestframework = "^3.14.0"
 django-jazzmin = "^2.6.0"
 djangorestframework-simplejwt = "^5.3.0"
-django-jsonform = "^2.19.1"
+django-jsonform = "^2.21.5"
 django-cors-headers = "^4.2.0"
 docutils = "^0.20.1"
 xlsxwriter = "^3.1.7"
